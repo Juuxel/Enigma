@@ -1,12 +1,19 @@
 package cuchaz.enigma.gui.elements;
 
+import cuchaz.enigma.analysis.EntryReference;
 import cuchaz.enigma.config.Config;
 import cuchaz.enigma.config.Themes;
 import cuchaz.enigma.gui.Gui;
+import cuchaz.enigma.gui.GuiController;
 import cuchaz.enigma.gui.dialog.AboutDialog;
 import cuchaz.enigma.gui.dialog.SearchDialog;
 import cuchaz.enigma.gui.stats.StatsMember;
+import cuchaz.enigma.translation.mapping.EntryMapping;
+import cuchaz.enigma.translation.mapping.EntryRemapper;
 import cuchaz.enigma.translation.mapping.serde.MappingFormat;
+import cuchaz.enigma.translation.representation.entry.ClassEntry;
+import cuchaz.enigma.translation.representation.entry.Entry;
+import cuchaz.enigma.translation.representation.entry.LocalVariableEntry;
 import cuchaz.enigma.utils.I18n;
 import cuchaz.enigma.utils.Utils;
 
@@ -24,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MenuBar extends JMenuBar {
 
@@ -292,6 +300,33 @@ public class MenuBar extends JMenuBar {
 					}
 				});
 			}
+		}
+		{
+			JMenuItem menu = new JMenuItem("Parameters: World \u2192 Level");
+			this.add(menu);
+			menu.addActionListener(event -> {
+				GuiController control = gui.getController();
+				EntryRemapper mapper = control.project.getMapper();
+
+				Stream<LocalVariableEntry> arguments = mapper.getObfEntries()
+						.filter(it -> it instanceof LocalVariableEntry)
+						.map(it -> (LocalVariableEntry) it)
+						.filter(LocalVariableEntry::isArgument)
+						.filter(it -> {
+							EntryMapping mapping = mapper.getDeobfMapping(it);
+							return mapping != null && "world".equals(mapping.getTargetName());
+						});
+
+				arguments.forEach(arg -> {
+					EntryReference<Entry<?>, Entry<?>> ref = new EntryReference<>(arg, arg.getName());
+					try {
+						control.rename(ref, "level", false);
+					} catch (Exception e) {
+						System.err.print("Warning: Couldn't rename " + arg + ":");
+						e.printStackTrace();
+					}
+				});
+			});
 		}
 	}
 }
