@@ -13,6 +13,7 @@ import cuchaz.enigma.translation.mapping.EntryRemapper;
 import cuchaz.enigma.translation.mapping.serde.MappingFormat;
 import cuchaz.enigma.translation.representation.entry.ClassEntry;
 import cuchaz.enigma.translation.representation.entry.Entry;
+import cuchaz.enigma.translation.representation.entry.FieldEntry;
 import cuchaz.enigma.translation.representation.entry.LocalVariableEntry;
 import cuchaz.enigma.utils.I18n;
 import cuchaz.enigma.utils.Utils;
@@ -302,31 +303,61 @@ public class MenuBar extends JMenuBar {
 			}
 		}
 		{
-			JMenuItem menu = new JMenuItem("Parameters: World \u2192 Level");
+			JMenu menu = new JMenu("World \u2192 Level");
 			this.add(menu);
-			menu.addActionListener(event -> {
-				GuiController control = gui.getController();
-				EntryRemapper mapper = control.project.getMapper();
+			{
+				JMenuItem item = new JMenuItem("Parameters");
+				menu.add(item);
+				item.addActionListener(event -> {
+					GuiController control = gui.getController();
+					EntryRemapper mapper = control.project.getMapper();
 
-				Stream<LocalVariableEntry> arguments = mapper.getObfEntries()
-						.filter(it -> it instanceof LocalVariableEntry)
-						.map(it -> (LocalVariableEntry) it)
-						.filter(LocalVariableEntry::isArgument)
-						.filter(it -> {
-							EntryMapping mapping = mapper.getDeobfMapping(it);
-							return mapping != null && "world".equals(mapping.getTargetName());
-						});
+					Stream<LocalVariableEntry> arguments = mapper.getObfEntries()
+							.filter(it -> it instanceof LocalVariableEntry)
+							.map(it -> (LocalVariableEntry) it)
+							.filter(LocalVariableEntry::isArgument)
+							.filter(it -> {
+								EntryMapping mapping = mapper.getDeobfMapping(it);
+								return mapping != null && "world".equals(mapping.getTargetName());
+							});
 
-				arguments.forEach(arg -> {
-					EntryReference<Entry<?>, Entry<?>> ref = new EntryReference<>(arg, arg.getName());
-					try {
-						control.rename(ref, "level", false);
-					} catch (Exception e) {
-						System.err.print("Warning: Couldn't rename " + arg + ":");
-						e.printStackTrace();
-					}
+					arguments.forEach(arg -> {
+						EntryReference<Entry<?>, Entry<?>> ref = new EntryReference<>(arg, arg.getName());
+						try {
+							control.rename(ref, "level", false);
+						} catch (Exception e) {
+							System.err.print("Warning: Couldn't rename " + arg + ":");
+							e.printStackTrace();
+						}
+					});
 				});
-			});
+			}
+			{
+				JMenuItem item = new JMenuItem("Fields");
+				menu.add(item);
+				item.addActionListener(event -> {
+					GuiController control = gui.getController();
+					EntryRemapper mapper = control.project.getMapper();
+
+					Stream<FieldEntry> fields = mapper.getObfEntries()
+							.filter(it -> it instanceof FieldEntry)
+							.map(it -> (FieldEntry) it)
+							.filter(it -> {
+								EntryMapping mapping = mapper.getDeobfMapping(it);
+								return mapping != null && "world".equals(mapping.getTargetName());
+							});
+
+					fields.forEach(arg -> {
+						EntryReference<Entry<?>, Entry<?>> ref = new EntryReference<>(arg, arg.getName());
+						try {
+							control.rename(ref, "level", false);
+						} catch (Exception e) {
+							System.err.print("Warning: Couldn't rename " + arg + ":");
+							e.printStackTrace();
+						}
+					});
+				});
+			}
 		}
 	}
 }
