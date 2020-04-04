@@ -30,7 +30,7 @@ public class NameValidator {
 	);
 
 	static {
-		String identifierRegex = "[A-Za-zÅÄÖåäö_<][A-Za-zÅÄÖåäö0-9_>]*";
+		String identifierRegex = "[A-Za-z\u00c5\u00c4\u00d6\u00e5\u00e4\u00f6_<][A-Za-z\u00c5\u00c4\u00d6\u00e5\u00e4\u00f60-9_>]*";
 		IDENTIFIER_PATTERN = Pattern.compile(identifierRegex);
 		CLASS_PATTERN = Pattern.compile(String.format("^(%s(\\.|/))*(%s)$", identifierRegex, identifierRegex));
 	}
