@@ -111,7 +111,7 @@ public class GuiController {
 			}
 
 			ClassNode fixedNode = new ClassNode();
-			node.accept(new SourceFixVisitor(Opcodes.ASM7, fixedNode, project.getJarIndex()));
+			node.accept(new SourceFixVisitor(Utils.ASM_VERSION, fixedNode, project.getJarIndex()));
 			return fixedNode;
 		}, new SourceSettings(true, true));
 	}
@@ -547,7 +547,7 @@ public class GuiController {
 	}
 
 	public void changeDocs(EntryReference<Entry<?>, Entry<?>> reference, String updatedDocs) {
-		changeDoc(reference.getNameableEntry(), updatedDocs);
+		changeDoc(reference.entry, updatedDocs);
 
 		refreshCurrentClass(reference, RefreshMode.JAVADOCS);
 	}
